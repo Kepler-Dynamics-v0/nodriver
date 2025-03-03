@@ -60,58 +60,7 @@ USER nodriver
 # Set Chrome executable path for nodriver
 ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# Create a simple test script
-RUN cat > /app/test_script.py << 'EOL'
-import asyncio
-import nodriver as uc
-import logging
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-
-async def main():
-    config = uc.Config(
-        headless=False,  # We're using Xvfb instead
-        sandbox=False,
-        browser_args=[
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--disable-software-rasterizer",
-            "--disable-extensions",
-            "--disable-setuid-sandbox",
-            "--no-first-run",
-            "--no-zygote",
-            "--single-process",
-            "--disable-breakpad"
-        ]
-    )
-    try:
-        print("Starting browser...")
-        browser = await uc.start(config=config)
-        print("Browser started, getting page...")
-        page = await browser.get("https://www.example.com")
-        print("Page loaded, getting title...")
-        title = await page.title
-        print("Page title:", title)
-        print("Closing browser...")
-        await browser.close()
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        print(traceback.format_exc())
-
-if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
-EOL
-
-# Create a wrapper script to start Xvfb and run the test
-RUN cat > /app/run.sh << 'EOL'
-#!/bin/bash
-Xvfb :99 -screen 0 1280x1024x24 &
-export DISPLAY=:99
-python /app/test_script.py
-EOL
+# Make the run script executable
 RUN chmod +x /app/run.sh
 
 # Command to run when container starts
