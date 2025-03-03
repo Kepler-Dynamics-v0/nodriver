@@ -58,11 +58,9 @@ USER nodriver
 
 # Set Chrome executable path for nodriver
 ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-# Set default Chrome arguments for headless operation in VM environment
-ENV NODRIVER_CHROME_ARGS="--headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer --disable-extensions --disable-setuid-sandbox --no-first-run --no-zygote --single-process --disable-breakpad"
 
 # Create a simple test script
-RUN echo 'import asyncio\nimport nodriver as uc\n\nasync def main():\n    browser = await uc.start(headless=True, sandbox=False)\n    page = await browser.get("https://www.example.com")\n    print("Page title:", await page.title)\n    await browser.close()\n\nif __name__ == "__main__":\n    uc.loop().run_until_complete(main())' > /app/test_script.py
+RUN echo 'import asyncio\nimport nodriver as uc\n\nasync def main():\n    config = uc.Config(\n        headless=True,\n        sandbox=False,\n        browser_args=[\n            "--no-sandbox",\n            "--disable-dev-shm-usage",\n            "--disable-gpu",\n            "--disable-software-rasterizer",\n            "--disable-extensions",\n            "--disable-setuid-sandbox",\n            "--no-first-run",\n            "--no-zygote",\n            "--single-process",\n            "--disable-breakpad",\n            "--headless=new"\n        ]\n    )\n    browser = await uc.start(config=config)\n    page = await browser.get("https://www.example.com")\n    print("Page title:", await page.title)\n    await browser.close()\n\nif __name__ == "__main__":\n    uc.loop().run_until_complete(main())' > /app/test_script.py
 
 # Command to run when container starts
 CMD ["python", "/app/test_script.py"] 
