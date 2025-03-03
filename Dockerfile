@@ -35,7 +35,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -s /usr/bin/google-chrome-stable /usr/bin/google-chrome \
+    && ln -s /usr/bin/google-chrome-stable /usr/bin/chrome
 
 # Create and set working directory
 WORKDIR /app
@@ -58,7 +60,8 @@ RUN groupadd -r -g 1000 nodriver && \
 USER nodriver
 
 # Set Chrome executable path for nodriver
-ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome
+ENV DISPLAY=:99
 
 # Make the run script executable
 RUN chmod +x /app/run.sh
