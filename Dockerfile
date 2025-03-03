@@ -50,7 +50,8 @@ RUN groupadd -r -g 1000 nodriver && \
     useradd -r -u 1000 -g nodriver -G audio,video nodriver && \
     mkdir -p /home/nodriver/Downloads && \
     chown -R nodriver:nodriver /home/nodriver && \
-    chown -R nodriver:nodriver /app
+    chown -R nodriver:nodriver /app && \
+    chmod -R 755 /app
 
 # Switch to non-root user
 USER nodriver
@@ -61,8 +62,7 @@ ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ENV NODRIVER_CHROME_ARGS="--headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer --disable-extensions --disable-setuid-sandbox --no-first-run --no-zygote --single-process --disable-breakpad"
 
 # Create a simple test script
-RUN echo 'import asyncio\nimport nodriver as uc\n\nasync def main():\n    browser = await uc.start(headless=True, additional_browser_args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--disable-setuid-sandbox", "--no-first-run", "--no-zygote", "--single-process", "--disable-breakpad"])\n    page = await browser.get("https://www.example.com")\n    print("Page title:", await page.title)\n    await browser.close()\n\nif __name__ == "__main__":\n    uc.loop().run_until_complete(main())' > /app/test_script.py
+RUN echo 'import asyncio\nimport nodriver as uc\n\nasync def main():\n    browser = await uc.start(headless=True, sandbox=False)\n    page = await browser.get("https://www.example.com")\n    print("Page title:", await page.title)\n    await browser.close()\n\nif __name__ == "__main__":\n    uc.loop().run_until_complete(main())' > /app/test_script.py
 
 # Command to run when container starts
-# This can be overridden when running the container
 CMD ["python", "/app/test_script.py"] 

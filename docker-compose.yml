@@ -7,14 +7,14 @@ services:
       dockerfile: Dockerfile
     volumes:
       # Mount your scripts directory if needed
-      - ./example:/app/example
+      - ./example:/app/example:rw
       # Mount a directory for screenshots and downloads
-      - ./data:/home/nodriver/Downloads
+      - ./data:/home/nodriver/Downloads:rw
     environment:
       # Add any environment variables you need here
       - NO_SANDBOX=1  # Required when running as root in Docker
       - HEADLESS=1    # Enable headless mode
-    user: "1000:1000"  # Add this line to run as non-root
+      - CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
     healthcheck:
       test: ["CMD", "google-chrome-stable", "--version"]
       interval: 30s
