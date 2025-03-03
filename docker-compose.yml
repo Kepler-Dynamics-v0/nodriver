@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  nodriver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount your scripts directory if needed
+      - ./example:/app/example
+      # Mount a directory for screenshots and downloads
+      - ./data:/home/nodriver/Downloads
+    environment:
+      # Add any environment variables you need here
+      - NO_SANDBOX=1  # Required when running as root in Docker
+      - HEADLESS=1    # Enable headless mode
+    healthcheck:
+      test: ["CMD", "google-chrome-stable", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # If you want to run a specific example, uncomment and modify this line
+    # command: python example/demo.py
+    # For interactive use, you can use this instead
+    # command: python -m IPython 

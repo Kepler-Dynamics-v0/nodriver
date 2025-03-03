@@ -8,7 +8,7 @@ using a relatively simple interface.**
 * **This is the official successor of the** [Undetected-Chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver/) **python package.**
 * **No more webdriver, no more selenium**
 
-Direct communication provides even better resistance against web applicatinon firewalls (WAF’s), while
+Direct communication provides even better resistance against web applicatinon firewalls (WAF's), while
 performance gets a massive boost.
 This module is, contrary to undetected-chromedriver, fully asynchronous.
 
@@ -20,7 +20,7 @@ with most method parameters having `best practice` defaults.
 Using 1 or 2 lines, this is up and running, providing best practice config
 by default.
 
-While usability and convenience is important. It’s also easy
+While usability and convenience is important. It's also easy
 to fully customizable everything using the entire array of
 [CDP](https://chromedevtools.github.io/devtools-protocol/) domains, methods and events available.
 
@@ -29,7 +29,7 @@ to fully customizable everything using the entire array of
 * A blazing fast undetected chrome (-ish) automation library
 * No chromedriver binary or Selenium dependency
 * This equals bizarre performance increase and less detections!
-* Up and running in 1 line of code\*
+* Up and running in 1 line of code*
 * uses fresh profile on each run, cleans up on exit
 * save and load cookies to file to not repeat tedious login steps
 * smart element lookup, by selector or text, including iframe content.
@@ -43,20 +43,6 @@ to fully customizable everything using the entire array of
 * packed with helpers and utility methods for most used and important operations
 
 ### what is new
-
-**tab.cf_verify()**
-
-finds the checkbox and click it successfully
-this only works when NOT in expert mode.
-currently built-in english only
-requires opencv-python package to be installed
-
-[<video src="./docs/cf_verify_.mp4" width="700" autoplay playsInline controls></video>](https://github.com/user-attachments/assets/6406a561-3f27-4b30-8516-7c790ee3d5fe)
-
-**tab.bypass_insecure_connection_warning()**
-
-convenience method, for insecure page warning.
-for example when a certificate is invalid.
 
 **tab.open_external_debugger()**
 
@@ -274,3 +260,178 @@ if __name__ == "__main__":
     # i use
     uc.loop().run_until_complete(main())
 ```
+
+# Nodriver Docker Setup
+
+A Docker setup for running the [Nodriver](https://github.com/ultrafunkamsterdam/nodriver) package in a containerized environment. Perfect for VM instances and cloud deployments.
+
+## Features
+
+- Runs Chrome in headless mode
+- Optimized for VM environments without GPU
+- Includes example scripts
+- Easy to deploy and use
+- Secure non-root user setup
+
+## Quick Start
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/nodriver-docker.git
+   cd nodriver-docker
+   ```
+
+2. Create data directory:
+   ```bash
+   mkdir -p data
+   ```
+
+3. Build and run:
+   ```bash
+   docker-compose up --build
+   ```
+
+## VM Deployment
+
+1. SSH into your VM:
+   ```bash
+   ssh your-vm-ip
+   ```
+
+2. Install Docker and Docker Compose (if not already installed):
+   ```bash
+   sudo apt update
+   sudo apt install docker.io docker-compose
+   sudo systemctl enable --now docker
+   sudo usermod -aG docker $USER
+   # Log out and back in after this
+   ```
+
+3. Clone this repository:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/nodriver-docker.git
+   cd nodriver-docker
+   ```
+
+4. Create data directory:
+   ```bash
+   mkdir -p data
+   ```
+
+5. Build and run in detached mode:
+   ```bash
+   docker-compose up --build -d
+   ```
+
+6. View logs:
+   ```bash
+   docker-compose logs -f
+   ```
+
+## Running Your Own Scripts
+
+1. Create a directory for your scripts:
+   ```bash
+   mkdir -p my_scripts
+   ```
+
+2. Add your script (e.g., `my_scripts/my_script.py`):
+   ```python
+   import asyncio
+   import nodriver as uc
+
+   async def main():
+       browser = await uc.start(
+           headless=True,
+           additional_browser_args=[
+               "--no-sandbox",
+               "--disable-dev-shm-usage",
+               "--disable-gpu",
+               "--disable-software-rasterizer",
+               "--disable-extensions",
+               "--disable-setuid-sandbox",
+               "--no-first-run",
+               "--no-zygote",
+               "--single-process",
+               "--disable-breakpad"
+           ]
+       )
+       page = await browser.get('https://www.example.com')
+       await page.save_screenshot()
+       await browser.close()
+
+   if __name__ == '__main__':
+       uc.loop().run_until_complete(main())
+   ```
+
+3. Update `docker-compose.yml`:
+   ```yaml
+   volumes:
+     - ./my_scripts:/app/my_scripts
+     - ./data:/home/nodriver/Downloads
+   command: python my_scripts/my_script.py
+   ```
+
+4. Restart the container:
+   ```bash
+   docker-compose down
+   docker-compose up -d
+   ```
+
+## Project Structure
+
+```
+nodriver-docker/
+├── Dockerfile              # Docker configuration
+├── docker-compose.yml      # Docker Compose configuration
+├── docker_example.py       # Example script
+├── data/                  # Directory for screenshots and downloads
+├── my_scripts/           # Directory for your custom scripts
+└── README.md             # This file
+```
+
+## Environment Variables
+
+The following environment variables are set by default:
+
+- `CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable`
+- `NODRIVER_CHROME_ARGS`: Chrome flags optimized for VM environments
+
+## Troubleshooting
+
+### Chrome Crashes
+
+If Chrome crashes, try adding these flags to your script:
+```python
+browser = await uc.start(
+    headless=True,
+    additional_browser_args=[
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-software-rasterizer",
+        "--disable-extensions",
+        "--disable-setuid-sandbox",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-breakpad"
+    ]
+)
+```
+
+### View Logs
+
+```bash
+docker-compose logs -f
+```
+
+### Interactive Shell
+
+```bash
+docker-compose exec nodriver bash
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
