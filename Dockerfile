@@ -61,11 +61,58 @@ USER nodriver
 ENV CHROME_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Create a simple test script
-RUN echo 'import asyncio\nimport nodriver as uc\nimport logging\n\n# Set up logging\nlogging.basicConfig(level=logging.DEBUG)\n\nasync def main():\n    config = uc.Config(\n        headless=False,  # We\'re using Xvfb instead\n        sandbox=False,\n        browser_args=[\n            "--no-sandbox",\n            "--disable-dev-shm-usage",\n            "--disable-gpu",\n            "--disable-software-rasterizer",\n            "--disable-extensions",\n            "--disable-setuid-sandbox",\n            "--no-first-run",\n            "--no-zygote",\n            "--single-process",\n            "--disable-breakpad"\n        ]\n    )\n    try:\n        print("Starting browser...")\n        browser = await uc.start(config=config)\n        print("Browser started, getting page...")\n        page = await browser.get("https://www.example.com")\n        print("Page loaded, getting title...")\n        title = await page.title\n        print("Page title:", title)\n        print("Closing browser...")\n        await browser.close()\n    except Exception as e:\n        print(f"Error: {e}")\n        import traceback\n        print(traceback.format_exc())\n\nif __name__ == "__main__":\n    uc.loop().run_until_complete(main())' > /app/test_script.py
+RUN cat > /app/test_script.py << 'EOL'
+import asyncio
+import nodriver as uc
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+
+async def main():
+    config = uc.Config(
+        headless=False,  # We're using Xvfb instead
+        sandbox=False,
+        browser_args=[
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--disable-software-rasterizer",
+            "--disable-extensions",
+            "--disable-setuid-sandbox",
+            "--no-first-run",
+            "--no-zygote",
+            "--single-process",
+            "--disable-breakpad"
+        ]
+    )
+    try:
+        print("Starting browser...")
+        browser = await uc.start(config=config)
+        print("Browser started, getting page...")
+        page = await browser.get("https://www.example.com")
+        print("Page loaded, getting title...")
+        title = await page.title
+        print("Page title:", title)
+        print("Closing browser...")
+        await browser.close()
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        print(traceback.format_exc())
+
+if __name__ == "__main__":
+    uc.loop().run_until_complete(main())
+EOL
 
 # Create a wrapper script to start Xvfb and run the test
-RUN echo '#!/bin/bash\nXvfb :99 -screen 0 1280x1024x24 &\nexport DISPLAY=:99\npython /app/test_script.py' > /app/run.sh && \
-    chmod +x /app/run.sh
+RUN cat > /app/run.sh << 'EOL'
+#!/bin/bash
+Xvfb :99 -screen 0 1280x1024x24 &
+export DISPLAY=:99
+python /app/test_script.py
+EOL
+RUN chmod +x /app/run.sh
 
 # Command to run when container starts
 CMD ["/app/run.sh"] 
