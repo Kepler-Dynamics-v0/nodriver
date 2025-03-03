@@ -14,6 +14,7 @@ services:
       # Add any environment variables you need here
       - NO_SANDBOX=1  # Required when running as root in Docker
       - HEADLESS=1    # Enable headless mode
+    user: "1000:1000"  # Add this line to run as non-root
     healthcheck:
       test: ["CMD", "google-chrome-stable", "--version"]
       interval: 30s
@@ -22,4 +23,4 @@ services:
     # If you want to run a specific example, uncomment and modify this line
     # command: python example/demo.py
     # For interactive use, you can use this instead
-    # command: python -m IPython 
+    # command: python -m IPython

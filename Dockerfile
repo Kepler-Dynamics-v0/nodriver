@@ -46,10 +46,11 @@ COPY . /app/
 RUN pip install --no-cache-dir -e .
 
 # Create a non-root user to run Chrome (Chrome won't run as root without --no-sandbox)
-RUN groupadd -r nodriver && useradd -r -g nodriver -G audio,video nodriver \
-    && mkdir -p /home/nodriver/Downloads \
-    && chown -R nodriver:nodriver /home/nodriver \
-    && chown -R nodriver:nodriver /app
+RUN groupadd -r -g 1000 nodriver && \
+    useradd -r -u 1000 -g nodriver -G audio,video nodriver && \
+    mkdir -p /home/nodriver/Downloads && \
+    chown -R nodriver:nodriver /home/nodriver && \
+    chown -R nodriver:nodriver /app
 
 # Switch to non-root user
 USER nodriver
